@@ -30,7 +30,7 @@ ARG python_version=3.5
 # Creation of a python environment
 RUN conda install -y python=${python_version} && \
 	conda install -y \
-    h5py \
+    	h5py \
 	pandas \
 	pygpu==0.6.2 \
 	nose \
@@ -70,7 +70,6 @@ RUN ln -s /usr/local/cuda-8.0/lib64/stubs/libcuda.so /usr/local/cuda-8.0/lib64/s
 # 3. Uncomment the lines between <START> and <END>
 
 # <START>
-#RUN mkdir /root/cudnn
 # ADD auto extracts tar file in destination folder 
 #ADD cudnn-8.0-linux-x64-v5.1.tar.gz /root/cudnn-8.0-linux-x64-v5.1 
 # Copy files in the cuda installation folders and cleanup
@@ -78,16 +77,16 @@ RUN ln -s /usr/local/cuda-8.0/lib64/stubs/libcuda.so /usr/local/cuda-8.0/lib64/s
 #	cp lib64/* /usr/local/cuda/lib64/ && \
 #	cp include/* /usr/local/cuda/include/ && \ 
 #	cd ~ && \
-#	rm -rf cudnn-8.0-linux-x64-v5.1
-# 	cd \ \
+#	rm -rf cudnn-8.0-linux-x64-v5.1 && \
+#	cd / \
 # <END>
 
 # Install scikit-cuda
-RUN cd ~ && \ 
+RUN cd /root && \ 
 	git clone https://github.com/lebedov/scikit-cuda && \
 	cd scikit-cuda && \
 	python setup.py install && \
-	cd \
+	cd / \
 
 ## Configure default locale, see https://github.com/rocker-org/rocker/issues/19
 RUN echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen \
@@ -133,3 +132,4 @@ RUN mkdir /root/shared_data
 VOLUME /root/shared_data
 WORKDIR /root
 EXPOSE 8888
+ENV JUPYTER_CONFIG_PATH=/root/shared_data/.config
