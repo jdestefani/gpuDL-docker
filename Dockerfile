@@ -37,19 +37,17 @@ RUN conda install -y python=${python_version} && \
 	mkl \
 	six \
 	pyyaml \
+	jupyter \
+	matplotlib \
+	seaborn \
+	scikit-learn \
 	&& conda clean --yes --tarballs --packages --source-cache \
 	&& pip install --upgrade -I setuptools \
 	&& pip install --upgrade \
 	keras==2.0.5 \
 	tensorflow-gpu==1.2.0 \
 	ipyparallel && ipcluster nbextension enable
-
-RUN conda install -y \
-    jupyter \
-	matplotlib \
-	seaborn \
-	scikit-learn
-
+    	
 RUN conda install -c conda-forge -y blas && \
 	conda clean -yt 
 
