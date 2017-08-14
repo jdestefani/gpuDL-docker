@@ -37,19 +37,17 @@ RUN conda install -y python=${python_version} && \
 	mkl \
 	six \
 	pyyaml \
+	jupyter \
+	matplotlib \
+	seaborn \
+	scikit-learn \
 	&& conda clean --yes --tarballs --packages --source-cache \
 	&& pip install --upgrade -I setuptools \
 	&& pip install --upgrade \
 	keras==2.0.5 \
 	tensorflow-gpu==1.2.0 \
 	ipyparallel && ipcluster nbextension enable
-
-RUN conda install -y \
-    jupyter \
-	matplotlib \
-	seaborn \
-	scikit-learn
-
+    	
 RUN conda install -c conda-forge -y blas && \
 	conda clean -yt 
 
@@ -72,16 +70,24 @@ RUN ln -s /usr/local/cuda-8.0/lib64/stubs/libcuda.so /usr/local/cuda-8.0/lib64/s
 # 3. Uncomment the lines between <START> and <END>
 
 # <START>
-#RUN mkdir /root/cudnn
+RUN mkdir /root/cudnn
 # ADD auto extracts tar file in destination folder 
-#ADD cudnn-8.0-linux-x64-v5.1.tar.gz /root/cudnn-8.0-linux-x64-v5.1 
+ADD cudnn-8.0-linux-x64-v5.1.tar.gz /root/cudnn-8.0-linux-x64-v5.1 
 # Copy files in the cuda installation folders and cleanup
-#RUN cd /root/cudnn-8.0-linux-x64-v5.1/cuda && \
-#	cp lib64/* /usr/local/cuda/lib64/ && \
-#	cp include/* /usr/local/cuda/include/ && \ 
-#	cd ~ && \
-#	rm -rf cudnn-8.0-linux-x64-v5.1
+RUN cd /root/cudnn-8.0-linux-x64-v5.1/cuda && \
+	cp lib64/* /usr/local/cuda/lib64/ && \
+	cp include/* /usr/local/cuda/include/ && \ 
+	cd ~ && \
+	rm -rf cudnn-8.0-linux-x64-v5.1
+ 	cd \ \
 # <END>
+
+# Install scikit-cuda
+RUN cd ~ && \ 
+	git clone https://github.com/lebedov/scikit-cuda && \
+	cd scikit-cuda && \
+	python setup.py install && \
+	cd \
 
 ## Configure default locale, see https://github.com/rocker-org/rocker/issues/19
 RUN echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen \
