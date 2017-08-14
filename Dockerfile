@@ -79,7 +79,15 @@ RUN ln -s /usr/local/cuda-8.0/lib64/stubs/libcuda.so /usr/local/cuda-8.0/lib64/s
 #	cp include/* /usr/local/cuda/include/ && \ 
 #	cd ~ && \
 #	rm -rf cudnn-8.0-linux-x64-v5.1
+# 	cd \ \
 # <END>
+
+# Install scikit-cuda
+RUN cd ~ && \ 
+	git clone https://github.com/lebedov/scikit-cuda && \
+	cd scikit-cuda && \
+	python setup.py install && \
+	cd \
 
 ## Configure default locale, see https://github.com/rocker-org/rocker/issues/19
 RUN echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen \
