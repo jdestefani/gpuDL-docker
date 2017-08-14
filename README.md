@@ -24,6 +24,7 @@ It additionally installs the following packages
 * matplotlib 
 * seaborn 
 * scikit-learn
+* scikit-cuda
 
 ### R Packages
 * r-base-dev and [https://packages.ubuntu.com/xenial/r-recommended r-recommended] Ubuntu packages
@@ -53,6 +54,14 @@ It additionally installs the following packages
 * rstudio/keras (Github)
 * IRKernel/IRKernel (Github)
 
+# CUDNN support
+The Dockerfile available in the [master](/jdestefani/gpuDL-docker/tree/master) branch does not includethe support for the CUDNN 5.1 library.
+[CUDNN 5.1](https://developer.nvidia.com/cudnn) is distributed under a limited, non-exclusive, non-tra
+nsferable, non-sublicensable [license](https://cntk.ai/license/CUDNN_License.pdf) from NVIDIA.
+The CUDNN library can be obtained free of charge upon registration to the NVIDIA developer program [here](https://developer.nvidia.com/cudnn). 
+A Dockerfile installing CUDNN is available on the [cudnn](/jdestefani/gpuDL-docker/tree/cudnn) branch, that requires the presence of the version 5.1 - Linux x64 in the archive ```cudnn-8.0-linux-x64-v5.1.tar.gz```, which should be put in the same folder as Dockerfile.
+
+
 # Quickstart
 ```
 git clone https://github.com/jdestefani/gpuDL-docker.git
@@ -67,7 +76,6 @@ Note:
 * Ports are shared as follows:
     * 8888 bridges to the Jupyter Notebook
 * ```#PORT#``` should be replaced with the port on which the default jupyter port (8888) should be redirected.
-* nvidia-docker
 
 # Build and running the container from scratch
 
