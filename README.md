@@ -55,11 +55,14 @@ It additionally installs the following packages
 * IRKernel/IRKernel (Github)
 
 # CUDNN support
-The Dockerfile available in the [master](/jdestefani/gpuDL-docker/tree/master) branch does not includethe support for the CUDNN 5.1 library.
+The Dockerfile available in the [master](https://github.com/jdestefani/gpuDL-docker/blob/master/) branch does not include the support for the CUDNN 5.1 library.
+
 [CUDNN 5.1](https://developer.nvidia.com/cudnn) is distributed under a limited, non-exclusive, non-tra
 nsferable, non-sublicensable [license](https://cntk.ai/license/CUDNN_License.pdf) from NVIDIA.
+
 The CUDNN library can be obtained free of charge upon registration to the NVIDIA developer program [here](https://developer.nvidia.com/cudnn). 
-A Dockerfile installing CUDNN is available on the [cudnn](/jdestefani/gpuDL-docker/tree/cudnn) branch, that requires the presence of the version 5.1 - Linux x64 in the archive ```cudnn-8.0-linux-x64-v5.1.tar.gz```, which should be put in the same folder as Dockerfile.
+
+A Dockerfile installing CUDNN is available on the [cudnn](https://github.com/jdestefani/gpuDL-docker/blob/cudnn/) branch, that requires the presence of the version 5.1 - Linux x64 in the archive ```cudnn-8.0-linux-x64-v5.1.tar.gz```, which should be put in the same folder as Dockerfile.
 
 
 # Quickstart
