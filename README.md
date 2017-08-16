@@ -93,7 +93,7 @@ git clone https://github.com/jdestefani/gpuDL-docker.git
 From Dockerfile folder, run
 
 ```
-docker build -t gpu_dl .
+docker build --rm=true -t gpu_dl .
 ```
 
 It may take about 30 minutes to complete.
