@@ -46,6 +46,7 @@ RUN conda install -y python=${python_version} && \
 	&& pip install --upgrade \
 	keras==2.0.5 \
 	tensorflow-gpu==1.2.0 \
+	plotly \
 	ipyparallel && ipcluster nbextension enable
     	
 RUN conda install -c conda-forge -y blas && \
@@ -71,14 +72,14 @@ RUN ln -s /usr/local/cuda-8.0/lib64/stubs/libcuda.so /usr/local/cuda-8.0/lib64/s
 
 # <START>
 # ADD auto extracts tar file in destination folder 
-ADD cudnn-8.0-linux-x64-v5.1.tar.gz /root/cudnn-8.0-linux-x64-v5.1 
+#ADD cudnn-8.0-linux-x64-v5.1.tar.gz /root/cudnn-8.0-linux-x64-v5.1 
 # Copy files in the cuda installation folders and cleanup
-RUN cd /root/cudnn-8.0-linux-x64-v5.1/cuda && \
-	cp lib64/* /usr/local/cuda/lib64/ && \
-	cp include/* /usr/local/cuda/include/ && \ 
-	cd ~ && \
-	rm -rf cudnn-8.0-linux-x64-v5.1 && \
- 	cd / \
+#RUN cd /root/cudnn-8.0-linux-x64-v5.1/cuda && \
+#	cp lib64/* /usr/local/cuda/lib64/ && \
+#	cp include/* /usr/local/cuda/include/ && \ 
+#	cd ~ && \
+#	rm -rf cudnn-8.0-linux-x64-v5.1 && \
+#	cd / \
 # <END>
 
 # Install scikit-cuda
@@ -124,8 +125,14 @@ RUN Rscript -e "install.packages(c('devtools'))"
 RUN Rscript -e "library(devtools); install_github('gbonte/gbcode')"
 RUN Rscript -e "library(devtools); install_github('rstudio/keras')"
 RUN Rscript -e "library(devtools); install_github('IRkernel/IRkernel'); IRkernel::installspec()"
-RUN Rscript -e "install.packages(c('dse','autoencoder','pls','MTS','rnn','feather','data.table','dplyr','ranger','zoo'))"
+RUN Rscript -e "install.packages(c('dse','autoencoder','pls','MTS','rnn','feather','data.table','dplyr','ranger','zoo','plotly','gmatrix','HiPLARM', 'HiPLARb'))"
 
+# Manual installation of gputools and patching of gputools
+RUN curl -O http://cran.r-project.org/src/contrib/gputools_1.1.tar.gz && \
+    tar -zxvf gputools_1.1.tar.gz && \\
+    cd gputools && sed -i -e 's@'R_INCLUDE="${R_HOME}/include"'@'R_INCLUDE="usr/share/R/include"'@g' configure && cd .. && \
+    tar -czvf gputools_1.1.tar.gz gputools && rm -rf gputools && \
+    Rscript -e "install.packages('~/gputools_1.1.tar.gz', repos = NULL, type = 'source')"
 
 # Add volume to allow data exchange with the host machine
 RUN mkdir /root/shared_data
