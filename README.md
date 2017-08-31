@@ -25,6 +25,7 @@ It additionally installs the following packages
 * seaborn 
 * scikit-learn
 * scikit-cuda
+* plotly
 
 ### R Packages
 * r-base-dev and [https://packages.ubuntu.com/xenial/r-recommended r-recommended] Ubuntu packages
@@ -50,6 +51,11 @@ It additionally installs the following packages
 * dplyr
 * ranger
 * zoo
+* plotly
+* gmatrix
+* HiPLARM 
+* HiPLARb
+* gputools
 * gbonte/gbcode (Github)
 * rstudio/keras (Github)
 * IRKernel/IRKernel (Github)
