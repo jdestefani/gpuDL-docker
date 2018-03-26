@@ -25,10 +25,11 @@ RUN curl -qsSLkO \
 ENV PATH=/root/miniconda3/bin:$PATH
 
 # Python
-ARG python_version=3.5
+ARG python_version=3.6
 
-# Creation of a python environment
-RUN conda install -y python=${python_version} && \
+# Update conda and creation of a python environment
+RUN conda update -n base conda && \
+    	conda install -y python=${python_version} && \
 	conda install -y \
     	h5py \
 	pandas \
@@ -48,9 +49,11 @@ RUN conda install -y python=${python_version} && \
 	tensorflow-gpu==1.2.0 \
 	plotly \
 	ipyparallel && ipcluster nbextension enable
-    	
-RUN conda install -c conda-forge -y blas && \
-	conda clean -yt 
+
+# BLAS installation
+RUN conda config --add channels conda-forge && \
+    conda install blas && \
+    conda clean -yt
 
 # Theano Library paths - To check
 ENV THEANO_FLAGS_CPU floatX=float32,device=cpu
@@ -128,7 +131,7 @@ RUN Rscript -e "library(devtools); install_github('IRkernel/IRkernel'); IRkernel
 RUN Rscript -e "install.packages(c('dse','autoencoder','pls','MTS','rnn','feather','data.table','dplyr','ranger','zoo','plotly','gmatrix','HiPLARM', 'HiPLARb'))"
 
 # Manual installation of gputools and patching of gputools
-RUN curl -O http://cran.r-project.org/src/contrib/gputools_1.1.tar.gz && \
+RUN curl -O http://cran.r-project.org/src/contrib/Archive/gputools/gputools_1.1.tar.gz && \
     tar -zxvf gputools_1.1.tar.gz && \
     cd gputools && sed -i -e 's/R_INCLUDE="${R_HOME}\/include"/R_INCLUDE="\/usr\/share\/R\/include"/g' configure && cd .. && \
     tar -czvf gputools_1.1.tar.gz gputools && rm -rf gputools && \
