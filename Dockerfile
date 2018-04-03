@@ -1,4 +1,4 @@
-FROM nvidia/cuda:8.0-cudnn5-devel-ubuntu16.04
+FROM nvidia/cuda:9.0-cudnn7-devel-ubuntu16.04
 
 MAINTAINER Jacopo De Stefani <jdestefa@ulb.ac.be>
 
@@ -14,6 +14,7 @@ RUN apt-get update \
 	  ca-certificates \
 	  fonts-texgyre \
 	  locales \
+	  --allow-downgrades libcudnn7=7.0.5.15-1+cuda9.0 \
 	  && rm -rf /var/lib/apt/lists/*
 
 # Miniconda installation
@@ -28,7 +29,8 @@ ENV PATH=/root/miniconda3/bin:$PATH
 ARG python_version=3.6
 
 # Creation of a python environment
-RUN conda install -y python=${python_version} && \
+RUN conda update -n base conda && \
+    	conda install -y python=${python_version} && \
 	conda install -y \
     	h5py \
 	pandas \
@@ -44,8 +46,8 @@ RUN conda install -y python=${python_version} && \
 	&& conda clean --yes --tarballs --packages --source-cache \
 	&& pip install --upgrade -I setuptools \
 	&& pip install --upgrade \
-	keras==2.0.5 \
-	tensorflow-gpu==1.2.0 \
+	keras==2.1.5 \
+	tensorflow-gpu==1.5.0 \
 	plotly \
 	ipyparallel && ipcluster nbextension enable
 
@@ -60,29 +62,12 @@ ENV THEANO_FLAGS_GPU floatX=float32,device=gpu,dnn.enabled=False,gpuarray.preall
 ENV THEANO_FLAGS_GPU_DNN floatX=float32,device=gpu,optimizer_including=cudnn,gpuarray.preallocate=0.8,dnn.conv.algo_bwd_filter=deterministic,dnn.conv.algo_bwd_data=deterministic,dnn.include_path=/usr/local/cuda/include,dnn.library_path=/usr/local/cuda/lib64
 
 # CUDA configuration
-ENV CUDA_HOME=/usr/local/cuda-8.0
-ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda-8.0/lib64:/usr/local/cuda-8.0/lib64/stubs
-ENV PATH=$PATH:/usr/local/cuda-8.0/bin
+ENV CUDA_HOME=/usr/local/cuda-9.0
+ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda-9.0/lib64:/usr/local/cuda-9.0/lib64/stubs
+ENV PATH=$PATH:/usr/local/cuda-9.0/bin
 
 # Symlink to existing library to comply with Tensorflow library names
-RUN ln -s /usr/local/cuda-8.0/lib64/stubs/libcuda.so /usr/local/cuda-8.0/lib64/stubs/libcuda.so.1
-
-# CUDNN manual installation
-# 1. Get CUDNN 5.1 for CUDA 8.0 - Linux_x64 at https://developer.nvidia.com/cudnn
-# 2. Save it in the same directory as this Dockerfile
-# 3. Uncomment the lines between <START> and <END>
-
-# <START>
-# ADD auto extracts tar file in destination folder 
-ADD cudnn-8.0-linux-x64-v5.1.tar.gz /root/cudnn-8.0-linux-x64-v5.1 
-# Copy files in the cuda installation folders and cleanup
-RUN cd /root/cudnn-8.0-linux-x64-v5.1/cuda && \
-	cp lib64/* /usr/local/cuda/lib64/ && \
-	cp include/* /usr/local/cuda/include/ && \ 
-	cd ~ && \
-	rm -rf cudnn-8.0-linux-x64-v5.1 && \
-	cd / \
-# <END>
+#RUN ln -s /usr/local/cuda-9.0/lib64/stubs/libcuda.so /usr/local/cuda-9.0/lib64/stubs/libcuda.so.1
 
 # Install scikit-cuda
 RUN cd /root && \ 
@@ -130,11 +115,11 @@ RUN Rscript -e "library(devtools); install_github('IRkernel/IRkernel'); IRkernel
 RUN Rscript -e "install.packages(c('dse','autoencoder','pls','MTS','rnn','feather','data.table','dplyr','ranger','zoo','plotly','gmatrix','HiPLARM', 'HiPLARb'))"
 
 # Manual installation of gputools and patching of gputools
-#RUN curl -O http://cran.r-project.org/src/contrib/gputools_1.1.tar.gz && \
-#    tar -zxvf gputools_1.1.tar.gz && \
-#    cd gputools && sed -i -e 's/R_INCLUDE="${R_HOME}\/include"/R_INCLUDE="\/usr\/share\/R\/include"/g' configure && cd .. && \
-#    tar -czvf gputools_1.1.tar.gz gputools && rm -rf gputools && \
-#    Rscript -e "install.packages('gputools_1.1.tar.gz', repos = NULL, type = 'source')"
+RUN curl -O http://cran.r-project.org/src/contrib/Archive/gputools/gputools_1.1.tar.gz && \
+    tar -zxvf gputools_1.1.tar.gz && \
+    cd gputools && sed -i -e 's/R_INCLUDE="${R_HOME}\/include"/R_INCLUDE="\/usr\/share\/R\/include"/g' configure && cd .. && \
+    tar -czvf gputools_1.1.tar.gz gputools && rm -rf gputools && \
+    Rscript -e "install.packages('gputools_1.1.tar.gz', repos = NULL, type = 'source')"
 
 # Add volume to allow data exchange with the host machine
 RUN mkdir /root/shared_data
