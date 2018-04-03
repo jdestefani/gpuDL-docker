@@ -4,7 +4,7 @@ This Dockerfile sets up a complete environment for experimenting with R, Python 
 
 It installs:
 * R 3.2.3 (r-base)
-* Python 3.5
+* Python 3.6
 * Miniconda 3 
 * Jupyter notebook for Python 
 
@@ -17,8 +17,8 @@ It additionally installs the following packages
 * mkl 
 * six 
 * pyyaml 
-* keras==2.0.5 
-* tensorflow-gpu==1.2.0 
+* keras==2.1.5 
+* tensorflow-gpu==1.5.0 
 * ipyparallel
 * jupyter 
 * matplotlib 
@@ -61,15 +61,7 @@ It additionally installs the following packages
 * IRKernel/IRKernel (Github)
 
 # CUDNN support
-The Dockerfile available in the [master](https://github.com/jdestefani/gpuDL-docker/blob/master/Dockerfile) branch does not include the support for the CUDNN 5.1 library.
-
-[CUDNN 5.1](https://developer.nvidia.com/cudnn) is distributed under a limited, non-exclusive, non-tra
-nsferable, non-sublicensable [license](https://cntk.ai/license/CUDNN_License.pdf) from NVIDIA.
-
-The CUDNN library can be obtained free of charge upon registration to the NVIDIA developer program [here](https://developer.nvidia.com/cudnn). 
-
-A Dockerfile installing CUDNN is available on the [cudnn](https://github.com/jdestefani/gpuDL-docker/blob/cudnn/Dockerfile) branch, that requires the presence of the version 5.1 - Linux x64 in the archive ```cudnn-8.0-linux-x64-v5.1.tar.gz```, which should be put in the same folder as Dockerfile.
-
+The image is based on the nvidia/cuda:9.0-cudnn7-devel-ubuntu16.04 from the official [NVIDIA CUDA Dockerhub](https://hub.docker.com/r/nvidia/cuda/) including CUDA 9.0 and cuDNN7, with the respective headers.
 
 # Quickstart
 ```
@@ -113,7 +105,7 @@ nvidia-docker run -it -v `pwd`/docker_volume:/root/shared_data -p #PORT#:8888 gp
 # How to verify that the Docker is working properly?
 0. Make sure that [git](https://git-scm.com/) and [nvidia-docker](https://github.com/NVIDIA/nvidia-docker) are installed. 
 1. Run docker container in interactive mode (```-it``` cf. Quickstart)
-2. Run following commands:
+2. Run the following commands and check the correct execution of the code:
 ```
 cd shared_data/samples
 python keras_CNN_MNIST.py
