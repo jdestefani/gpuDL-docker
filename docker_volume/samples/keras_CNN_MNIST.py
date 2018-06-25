@@ -7,11 +7,14 @@ Gets to 99.25% test accuracy after 12 epochs
 
 from __future__ import print_function
 import keras
+import os
 from keras.datasets import mnist
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Flatten
 from keras.layers import Conv2D, MaxPooling2D
 from keras import backend as K
+
+os.environ["CUDA_VISIBLE_DEVICES"] = "0" # Comma separated indexes of GPU to use
 
 batch_size = 128
 num_classes = 10
@@ -68,3 +71,5 @@ model.fit(x_train, y_train,
 score = model.evaluate(x_test, y_test, verbose=0)
 print('Test loss:', score[0])
 print('Test accuracy:', score[1])
+
+del os.environ["CUDA_VISIBLE_DEVICES"]

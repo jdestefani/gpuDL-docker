@@ -1,5 +1,7 @@
 library(keras)
 
+Sys.setenv(CUDA_VISIBLE_DEVICES="0") # Comma separated indexes of GPUs to use
+
 batch_size <- 128
 num_classes <- 10
 epochs <- 12
@@ -64,3 +66,5 @@ scores <- model %>% evaluate(
 
 cat('Test loss:', scores[[1]], '\n')
 cat('Test accuracy:', scores[[2]], '\n')
+
+Sys.unsetenv("CUDA_VISIBLE_DEVICES")

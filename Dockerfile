@@ -90,7 +90,7 @@ RUN apt-get update \
 		libssl-dev \
 		libcurl4-openssl-dev \
 		littler \
-        r-cran-littler \
+        	r-cran-littler \
 		r-base \
 		r-base-dev \
 		r-recommended \
@@ -109,7 +109,7 @@ RUN Rscript -e "install.packages(c('devtools'))"
 RUN Rscript -e "library(devtools); install_github('gbonte/gbcode')"
 RUN Rscript -e "library(devtools); install_github('rstudio/keras')"
 RUN Rscript -e "library(devtools); install_github('IRkernel/IRkernel'); IRkernel::installspec()"
-RUN Rscript -e "install.packages(c('dse','autoencoder','pls','MTS','rnn','feather','data.table','dplyr','ranger','zoo','plotly','gmatrix','HiPLARM', 'HiPLARb'))"
+RUN Rscript -e "install.packages(c('dse','autoencoder','pls','MTS','rnn','feather','data.table','dplyr','ranger','zoo','plotly','gmatrix','HiPLARM', 'HiPLARb','Rssa','psych'))"
 
 # Manual installation of gputools and patching of gputools
 RUN curl -O http://cran.r-project.org/src/contrib/Archive/gputools/gputools_1.1.tar.gz && \
