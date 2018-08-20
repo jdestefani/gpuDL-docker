@@ -1,9 +1,14 @@
 FROM nvidia/cuda:9.0-cudnn7-devel-ubuntu16.04
 
+ARG userPort=8888
+ARG userName=jdestefa
+ARG userGID=1002
+
 MAINTAINER Jacopo De Stefani <jdestefa@ulb.ac.be>
 
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
+      sudo \
       build-essential \
 	  ed \
 	  less \
@@ -20,10 +25,10 @@ RUN apt-get update \
 # Miniconda installation
 RUN curl -qsSLkO \
     https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-`uname -p`.sh \
-	&& bash Miniconda3-latest-Linux-`uname -p`.sh -b \
+	&& bash Miniconda3-latest-Linux-`uname -p`.sh -b -p /opt/miniconda3 \
 	&& rm Miniconda3-latest-Linux-`uname -p`.sh
 
-ENV PATH=/root/miniconda3/bin:$PATH
+ENV PATH=/opt/miniconda3/bin:$PATH
 
 # Python
 ARG python_version=3.6
@@ -83,6 +88,10 @@ ENV LANG en_US.UTF-8
 
 # R installation
 
+# Manually add R repository to list of sources to have R latest version
+RUN echo "deb https://cloud.r-project.org/bin/linux/ubuntu xenial/" >> /etc/apt/sources.list \
+&& apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
+
 ## Now install R and littler, and create a link for littler in /usr/local/bin
 ## Also set a default CRAN repo, and make sure littler knows about it too
 RUN apt-get update \
@@ -109,7 +118,8 @@ RUN Rscript -e "install.packages(c('devtools'))"
 RUN Rscript -e "library(devtools); install_github('gbonte/gbcode')"
 RUN Rscript -e "library(devtools); install_github('rstudio/keras')"
 RUN Rscript -e "library(devtools); install_github('IRkernel/IRkernel'); IRkernel::installspec()"
-RUN Rscript -e "install.packages(c('dse','autoencoder','pls','MTS','rnn','feather','data.table','dplyr','ranger','zoo','plotly','gmatrix','HiPLARM', 'HiPLARb','Rssa','psych'))"
+RUN Rscript -e "library(devtools); install_github('vqv/ggbiplot')"
+RUN Rscript -e "install.packages(c('dse','autoencoder','pls','MTS','rnn','feather','data.table','dplyr','ranger','zoo','plotly','gmatrix','HiPLARM', 'HiPLARb','Rssa','psych','kerasR','Rtsne','ggrepel'))"
 
 # Manual installation of gputools and patching of gputools
 RUN curl -O http://cran.r-project.org/src/contrib/Archive/gputools/gputools_1.1.tar.gz && \
@@ -118,9 +128,26 @@ RUN curl -O http://cran.r-project.org/src/contrib/Archive/gputools/gputools_1.1.
     tar -czvf gputools_1.1.tar.gz gputools && rm -rf gputools && \
     Rscript -e "install.packages('gputools_1.1.tar.gz', repos = NULL, type = 'source')"
 
+# Create user in order to avoid running the container as root
+RUN groupadd -g $userGID $userName
+RUN useradd -d /home/$userName -ms /bin/bash -g $userGID -G sudo,$userGID -p abc123 $userName
+USER $userName
+WORKDIR /home/$userName
+ENV PATH=/opt/miniconda3/bin:$PATH
+
+# Theano Library paths - To check
+ENV THEANO_FLAGS_CPU floatX=float32,device=cpu
+ENV THEANO_FLAGS_GPU floatX=float32,device=gpu,dnn.enabled=False,gpuarray.preallocate=0.8
+ENV THEANO_FLAGS_GPU_DNN floatX=float32,device=gpu,optimizer_including=cudnn,gpuarray.preallocate=0.8,dnn.conv.algo_bwd_filter=deterministic,dnn.conv.algo_bwd_data=deterministic,dnn.include_path=/usr/local/cuda/include,dnn.library_path=/usr/local/cuda/lib64
+
+# CUDA configuration
+ENV CUDA_HOME=/usr/local/cuda-9.0
+ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda-9.0/lib64:/usr/local/cuda-9.0/lib64/stubs
+ENV PATH=$PATH:/usr/local/cuda-9.0/bin
+
+
 # Add volume to allow data exchange with the host machine
-RUN mkdir /root/shared_data
-VOLUME /root/shared_data
-WORKDIR /root
-EXPOSE 8888
-ENV JUPYTER_CONFIG_PATH=/root/shared_data/.config
+RUN mkdir /home/$userName/shared_data
+VOLUME /home/$userName/shared_data
+EXPOSE $userPort
+#CMD jupyter notebook --no-browser --ip=0.0.0.0
