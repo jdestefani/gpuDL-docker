@@ -3,6 +3,7 @@ FROM nvidia/cuda:9.0-cudnn7-devel-ubuntu16.04
 ARG userPort=8888
 ARG userName=jdestefa
 ARG userGID=1002
+ARG userID=1002
 
 MAINTAINER Jacopo De Stefani <jdestefa@ulb.ac.be>
 
@@ -39,6 +40,7 @@ RUN conda update -n base conda && \
 	conda install -y \
     	h5py \
 	pandas \
+	pytables \
 	pygpu==0.6.2 \
 	nose \
 	mkl \
@@ -120,6 +122,7 @@ RUN Rscript -e "library(devtools); install_github('rstudio/keras')"
 RUN Rscript -e "library(devtools); install_github('IRkernel/IRkernel'); IRkernel::installspec()"
 RUN Rscript -e "library(devtools); install_github('vqv/ggbiplot')"
 RUN Rscript -e "install.packages(c('dse','autoencoder','pls','MTS','rnn','feather','data.table','dplyr','ranger','zoo','plotly','gmatrix','HiPLARM', 'HiPLARb','Rssa','psych','kerasR','Rtsne','ggrepel'))"
+RUN Rscript -e "install.packages(c('tsfeatures','RcppCNPy','Rtsne','TSclust','imputeTS'))"
 
 # Manual installation of gputools and patching of gputools
 RUN curl -O http://cran.r-project.org/src/contrib/Archive/gputools/gputools_1.1.tar.gz && \
@@ -130,7 +133,7 @@ RUN curl -O http://cran.r-project.org/src/contrib/Archive/gputools/gputools_1.1.
 
 # Create user in order to avoid running the container as root
 RUN groupadd -g $userGID $userName
-RUN useradd -d /home/$userName -ms /bin/bash -g $userGID -G sudo,$userGID -p abc123 $userName
+RUN useradd -u $userID -d /home/$userName -ms /bin/bash -g $userGID -G sudo,$userName -p abc123 $userName
 USER $userName
 WORKDIR /home/$userName
 ENV PATH=/opt/miniconda3/bin:$PATH
