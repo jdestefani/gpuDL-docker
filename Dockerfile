@@ -20,6 +20,11 @@ RUN apt-get update \
 	  ca-certificates \
 	  fonts-texgyre \
 	  locales \
+	  xvfb \
+	  libx11-dev \
+	  libglu1-mesa-dev \
+	  libfreetype6-dev \
+	  libpng16-16 \
 	  --allow-downgrades libcudnn7=7.0.5.15-1+cuda9.0 \
 	  && rm -rf /var/lib/apt/lists/*
 
@@ -41,7 +46,7 @@ RUN conda update -n base conda && \
     	h5py \
 	pandas \
 	pytables \
-	pygpu==0.6.2 \
+	pygpu \
 	nose \
 	mkl \
 	six \
@@ -49,7 +54,7 @@ RUN conda update -n base conda && \
 	jupyter \
 	matplotlib \
 	seaborn \
-	scikit-learn \
+	scikit-learn\
 	&& conda clean --yes --tarballs --packages --source-cache \
 	&& pip install --upgrade -I setuptools \
 	&& pip install --upgrade \
@@ -117,6 +122,7 @@ RUN apt-get update \
 
 RUN Rscript -e "install.packages(c('yhatr','forecast','stringr','randomForest','lubridate','rpart','e1071','kknn','ggplot2','plyr','reshape2','devtools'))"
 RUN Rscript -e "install.packages(c('devtools'))"
+RUN Rscript -e "library(devtools); install_version('mvtnorm', version ='1.0-7', repos = 'http://cran.us.r-project.org')"
 RUN Rscript -e "library(devtools); install_github('gbonte/gbcode')"
 RUN Rscript -e "library(devtools); install_github('rstudio/keras')"
 RUN Rscript -e "library(devtools); install_github('IRkernel/IRkernel'); IRkernel::installspec()"
