@@ -20,6 +20,7 @@ RUN apt-get update \
 	  ca-certificates \
 	  fonts-texgyre \
 	  locales \
+	  tmux \
 	  xvfb \
 	  libx11-dev \
 	  libglu1-mesa-dev \
@@ -58,8 +59,8 @@ RUN conda update -n base conda && \
 	&& conda clean --yes --tarballs --packages --source-cache \
 	&& pip install --upgrade -I setuptools \
 	&& pip install --upgrade \
-	keras==2.1.5 \
-	tensorflow-gpu==1.5.0 \
+	keras==2.2.4 \
+	tensorflow-gpu==1.11.0 \
 	plotly \
 	ipyparallel && ipcluster nbextension enable
 
@@ -97,7 +98,9 @@ ENV LANG en_US.UTF-8
 
 # Manually add R repository to list of sources to have R latest version
 RUN echo "deb https://cloud.r-project.org/bin/linux/ubuntu xenial/" >> /etc/apt/sources.list \
-&& apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
+&& gpg --keyserver pgpkeys.mit.edu --recv-key E084DAB9 \
+&& gpg -a --export E084DAB9 | apt-key add -
+##&& apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
 
 ## Now install R and littler, and create a link for littler in /usr/local/bin
 ## Also set a default CRAN repo, and make sure littler knows about it too
@@ -125,10 +128,10 @@ RUN Rscript -e "install.packages(c('devtools'))"
 RUN Rscript -e "library(devtools); install_version('mvtnorm', version ='1.0-7', repos = 'http://cran.us.r-project.org')"
 RUN Rscript -e "library(devtools); install_github('gbonte/gbcode')"
 RUN Rscript -e "library(devtools); install_github('rstudio/keras')"
-RUN Rscript -e "library(devtools); install_github('IRkernel/IRkernel'); IRkernel::installspec()"
 RUN Rscript -e "library(devtools); install_github('vqv/ggbiplot')"
 RUN Rscript -e "install.packages(c('dse','autoencoder','pls','MTS','rnn','feather','data.table','dplyr','ranger','zoo','plotly','gmatrix','HiPLARM', 'HiPLARb','Rssa','psych','kerasR','Rtsne','ggrepel'))"
-RUN Rscript -e "install.packages(c('tsfeatures','RcppCNPy','Rtsne','TSclust','imputeTS'))"
+RUN Rscript -e "install.packages(c('tsfeatures','RcppCNPy','TSclust','imputeTS','parallelDist'))"
+RUN Rscript -e "library(devtools); install_github('IRkernel/IRkernel');"
 
 # Manual installation of gputools and patching of gputools
 RUN curl -O http://cran.r-project.org/src/contrib/Archive/gputools/gputools_1.1.tar.gz && \
@@ -139,10 +142,12 @@ RUN curl -O http://cran.r-project.org/src/contrib/Archive/gputools/gputools_1.1.
 
 # Create user in order to avoid running the container as root
 RUN groupadd -g $userGID $userName
-RUN useradd -u $userID -d /home/$userName -ms /bin/bash -g $userGID -G sudo,$userName -p abc123 $userName
+RUN useradd -u $userID -d /home/$userName -ms /bin/bash -g $userGID -G sudo,$userName -p $(openssl passwd -1 abc123) $userName
 USER $userName
 WORKDIR /home/$userName
 ENV PATH=/opt/miniconda3/bin:$PATH
+RUN echo "alias notebook=\"jupyter notebook --ip='0.0.0.0' --NotebookApp.iopub_data_rate_limit=2147483647 --no-browser \" " >> /home/$userName/.bashrc
+RUN Rscript -e "IRkernel::installspec()"
 
 # Theano Library paths - To check
 ENV THEANO_FLAGS_CPU floatX=float32,device=cpu
