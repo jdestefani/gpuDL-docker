@@ -26,7 +26,8 @@ RUN apt-get update \
 	  libglu1-mesa-dev \
 	  libfreetype6-dev \
 	  libpng16-16 \
-	  --allow-downgrades libcudnn7=7.0.5.15-1+cuda9.0 \
+	  libcudnn7=7.2.1.38-1+cuda9.0 \ 
+	  #--allow-downgrades libcudnn7=7.0.5.15-1+cuda9.0 \
 	  && rm -rf /var/lib/apt/lists/*
 
 # Miniconda installation
@@ -98,9 +99,10 @@ ENV LANG en_US.UTF-8
 
 # Manually add R repository to list of sources to have R latest version
 RUN echo "deb https://cloud.r-project.org/bin/linux/ubuntu xenial/" >> /etc/apt/sources.list \
-&& gpg --keyserver pgpkeys.mit.edu --recv-key E084DAB9 \
-&& gpg -a --export E084DAB9 | apt-key add -
+&& gpg --keyserver hkp://keyserver.ubuntu.com --recv-key E298A3A825C0D65DFD57CBB651716619E084DAB9 \
+&& gpg -a --export E298A3A825C0D65DFD57CBB651716619E084DAB9 | apt-key add -
 ##&& apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
+
 
 ## Now install R and littler, and create a link for littler in /usr/local/bin
 ## Also set a default CRAN repo, and make sure littler knows about it too
