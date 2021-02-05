@@ -3,8 +3,8 @@
 This Dockerfile sets up a complete environment for experimenting with R, Python and  the most popular Deep Learning libraries (Tensorflow, Keras, Theano).
 
 It installs:
-* R 3.2.3 (r-base)
-* Python 3.6
+* R 4.0.3 (r-base)
+* Python 3.7
 * Miniconda 3 
 * Jupyter notebook for Python 
 
@@ -17,8 +17,8 @@ It additionally installs the following packages
 * mkl 
 * six 
 * pyyaml 
-* keras==2.1.5 
-* tensorflow-gpu==1.5.0 
+* keras==2.2.4 
+* tensorflow-gpu==1.13.1 
 * ipyparallel
 * jupyter 
 * matplotlib 
@@ -55,13 +55,14 @@ It additionally installs the following packages
 * gmatrix
 * HiPLARM 
 * HiPLARb
+* onlinePCA
 * gputools
 * gbonte/gbcode (Github)
-* rstudio/keras (Github)
+* rstudio/keras@2.2.4.1 (Github)
 * IRKernel/IRKernel (Github)
 
 # CUDNN support
-The image is based on the nvidia/cuda:9.0-cudnn7-devel-ubuntu16.04 from the official [NVIDIA CUDA Dockerhub](https://hub.docker.com/r/nvidia/cuda/) including CUDA 9.0 and cuDNN7, with the respective headers.
+The image is based on the nvidia/cuda:10.0-cudnn7-devel-ubuntu18.04 from the official [NVIDIA CUDA Dockerhub](https://hub.docker.com/r/nvidia/cuda/) including CUDA 10.0 and cuDNN7, with the respective headers.
 
 # Quickstart
 ```

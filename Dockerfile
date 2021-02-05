@@ -1,4 +1,5 @@
-FROM nvidia/cuda:9.0-cudnn7-devel-ubuntu16.04
+FROM nvidia/cuda:10.0-cudnn7-devel-ubuntu18.04
+#For CUDA compatibility: https://docs.nvidia.com/deploy/cuda-compatibility/index.html + nvidia-smi
 
 ARG userPort=8888
 ARG userName=jdestefa
@@ -7,8 +8,9 @@ ARG userID=1002
 
 MAINTAINER Jacopo De Stefani <jdestefa@ulb.ac.be>
 
+# Installing general purpose packages
 RUN apt-get update \
-  && apt-get install -y --no-install-recommends \
+  && apt-get install -y --no-install-recommends --allow-change-held-packages \
       sudo \
       build-essential \
 	  ed \
@@ -21,14 +23,18 @@ RUN apt-get update \
 	  fonts-texgyre \
 	  locales \
 	  tmux \
+	  htop \
 	  xvfb \
 	  libx11-dev \
 	  libglu1-mesa-dev \
 	  libfreetype6-dev \
 	  libpng16-16 \
-	  libcudnn7=7.2.1.38-1+cuda9.0 \ 
-	  #--allow-downgrades libcudnn7=7.0.5.15-1+cuda9.0 \
+	  libcudnn8 \
 	  && rm -rf /var/lib/apt/lists/*
+
+#libcudnn7=7.2.1.38-1+cuda9.0 \
+#--allow-downgrades libcudnn7=7.0.5.15-1+cuda9.0 \
+	  
 
 # Miniconda installation
 RUN curl -qsSLkO \
@@ -39,9 +45,10 @@ RUN curl -qsSLkO \
 ENV PATH=/opt/miniconda3/bin:$PATH
 
 # Python
-ARG python_version=3.6
+ARG python_version=3.7
 
 # Update conda and creation of a python environment
+# For Keras - Tensorflow pairings: https://docs.floydhub.com/guides/environments/
 RUN conda update -n base conda && \
     	conda install -y python=${python_version} && \
 	conda install -y \
@@ -61,7 +68,7 @@ RUN conda update -n base conda && \
 	&& pip install --upgrade -I setuptools \
 	&& pip install --upgrade \
 	keras==2.2.4 \
-	tensorflow-gpu==1.11.0 \
+	tensorflow-gpu==1.13.1 \
 	plotly \
 	ipyparallel && ipcluster nbextension enable
 
@@ -76,9 +83,10 @@ ENV THEANO_FLAGS_GPU floatX=float32,device=gpu,dnn.enabled=False,gpuarray.preall
 ENV THEANO_FLAGS_GPU_DNN floatX=float32,device=gpu,optimizer_including=cudnn,gpuarray.preallocate=0.8,dnn.conv.algo_bwd_filter=deterministic,dnn.conv.algo_bwd_data=deterministic,dnn.include_path=/usr/local/cuda/include,dnn.library_path=/usr/local/cuda/lib64
 
 # CUDA configuration
-ENV CUDA_HOME=/usr/local/cuda-9.0
-ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda-9.0/lib64:/usr/local/cuda-9.0/lib64/stubs
-ENV PATH=$PATH:/usr/local/cuda-9.0/bin
+ENV CUDA_HOME=/usr/local/cuda-10.0
+ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda-10.0/lib64:/usr/local/cuda-10.0/lib64/stubs
+ENV PATH=$PATH:/usr/local/cuda-10.0/bin
+# Adding symlinks to comply with tensorflow library names
 
 # Install scikit-cuda
 RUN cd /root && \ 
@@ -98,11 +106,12 @@ ENV LANG en_US.UTF-8
 # R installation
 
 # Manually add R repository to list of sources to have R latest version
-RUN echo "deb https://cloud.r-project.org/bin/linux/ubuntu xenial/" >> /etc/apt/sources.list \
-&& gpg --keyserver hkp://keyserver.ubuntu.com --recv-key E298A3A825C0D65DFD57CBB651716619E084DAB9 \
+RUN echo "deb https://cloud.r-project.org/bin/linux/ubuntu bionic-cran40/" >> /etc/apt/sources.list \
+&& gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-key E298A3A825C0D65DFD57CBB651716619E084DAB9 \
 && gpg -a --export E298A3A825C0D65DFD57CBB651716619E084DAB9 | apt-key add -
 ##&& apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
 
+ENV DEBIAN_FRONTEND="noninteractive" TZ="Europe/Brussels"
 
 ## Now install R and littler, and create a link for littler in /usr/local/bin
 ## Also set a default CRAN repo, and make sure littler knows about it too
@@ -129,10 +138,10 @@ RUN Rscript -e "install.packages(c('yhatr','forecast','stringr','randomForest','
 RUN Rscript -e "install.packages(c('devtools'))"
 RUN Rscript -e "library(devtools); install_version('mvtnorm', version ='1.0-7', repos = 'http://cran.us.r-project.org')"
 RUN Rscript -e "library(devtools); install_github('gbonte/gbcode')"
-RUN Rscript -e "library(devtools); install_github('rstudio/keras')"
+RUN Rscript -e "library(devtools); install_github('rstudio/keras@2.2.4.1')"
 RUN Rscript -e "library(devtools); install_github('vqv/ggbiplot')"
-RUN Rscript -e "install.packages(c('dse','autoencoder','pls','MTS','rnn','feather','data.table','dplyr','ranger','zoo','plotly','gmatrix','HiPLARM', 'HiPLARb','Rssa','psych','kerasR','Rtsne','ggrepel'))"
-RUN Rscript -e "install.packages(c('tsfeatures','RcppCNPy','TSclust','imputeTS','parallelDist'))"
+RUN Rscript -e "install.packages(c('dse','autoencoder','pls','MTS','rnn','feather','data.table','dplyr','ranger','zoo','plotly','gmatrix','HiPLARM', 'HiPLARb','Rssa','psych','kerasR','Rtsne','ggrepel','pryr'))"
+RUN Rscript -e "install.packages(c('tsfeatures','RcppCNPy','TSclust','imputeTS','parallelDist','onlinePCA'))"
 RUN Rscript -e "library(devtools); install_github('IRkernel/IRkernel');"
 
 # Manual installation of gputools and patching of gputools
@@ -155,12 +164,6 @@ RUN Rscript -e "IRkernel::installspec()"
 ENV THEANO_FLAGS_CPU floatX=float32,device=cpu
 ENV THEANO_FLAGS_GPU floatX=float32,device=gpu,dnn.enabled=False,gpuarray.preallocate=0.8
 ENV THEANO_FLAGS_GPU_DNN floatX=float32,device=gpu,optimizer_including=cudnn,gpuarray.preallocate=0.8,dnn.conv.algo_bwd_filter=deterministic,dnn.conv.algo_bwd_data=deterministic,dnn.include_path=/usr/local/cuda/include,dnn.library_path=/usr/local/cuda/lib64
-
-# CUDA configuration
-ENV CUDA_HOME=/usr/local/cuda-9.0
-ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda-9.0/lib64:/usr/local/cuda-9.0/lib64/stubs
-ENV PATH=$PATH:/usr/local/cuda-9.0/bin
-
 
 # Add volume to allow data exchange with the host machine
 RUN mkdir /home/$userName/shared_data
