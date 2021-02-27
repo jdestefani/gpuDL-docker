@@ -141,7 +141,7 @@ RUN Rscript -e "library(devtools); install_github('gbonte/gbcode')"
 RUN Rscript -e "library(devtools); install_github('rstudio/keras@2.2.4.1')"
 RUN Rscript -e "library(devtools); install_github('vqv/ggbiplot')"
 RUN Rscript -e "install.packages(c('dse','autoencoder','pls','MTS','rnn','feather','data.table','dplyr','ranger','zoo','plotly','gmatrix','HiPLARM', 'HiPLARb','Rssa','psych','kerasR','Rtsne','ggrepel','pryr'))"
-RUN Rscript -e "install.packages(c('tsfeatures','RcppCNPy','TSclust','imputeTS','parallelDist','onlinePCA'))"
+RUN Rscript -e "install.packages(c('tsfeatures','RcppCNPy','TSclust','imputeTS','parallelDist','onlinePCA','xgboost','parallel','lightgbm'))"
 RUN Rscript -e "library(devtools); install_github('IRkernel/IRkernel');"
 
 # Manual installation of gputools and patching of gputools
